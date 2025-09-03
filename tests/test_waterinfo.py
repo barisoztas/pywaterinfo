@@ -585,8 +585,15 @@ class TestTimeseriesList:
 
 class TestEnsembleTimeSeries:
     @pytest.mark.parametrize("connection", ["vmm_connection", "vmm_cached_connection"])
-    def test_not_implemented(self, connection, request):
-        """Not yet implemented in KIWIS API"""
+    def test_not_available_for_vmm(self, connection, request):
+        """If provider is VMM, WaterinfoException should be raised"""
+        connection = request.getfixturevalue(connection)
+        with pytest.raises(WaterinfoException):
+            connection.get_ensemble_timeseries_values()
+
+    @pytest.mark.parametrize("connection", ["hic_connection", "hic_cached_connection"])
+    def test_not_implemented_for_hic(self, connection, request):
+        """If provider is VMM, WaterinfoException should be raised"""
         connection = request.getfixturevalue(connection)
         with pytest.raises(NotImplementedError):
             connection.get_ensemble_timeseries_values()
