@@ -902,12 +902,11 @@ class Waterinfo:
         else:
             timezone = "UTC"
 
-        # if period is not None:
-        #     raise WaterinfoException("Period argument not implemented yet.")
-
-        if start or end:
-            raise WaterinfoException("Both start and end arguments must be provided")
-
+        #
+        if not (period or (start and end)):
+            raise WaterinfoException(
+                "Either a valid period or both start and end arguments must be provided"
+            )
         # check the period information
         period_info = self._parse_period(
             start=start, end=end, period=period, timezone=timezone
@@ -923,4 +922,27 @@ class Waterinfo:
 
         data, response = self.request_kiwis(query_param)
 
-        return data, response
+        df_ensembles = pd.DataFrame(data[str(ts_id)])
+
+        all_series = []
+        for _, row in df_ensembles.iterrows():
+            ts_dict = row["timeseries"]
+            df = pd.DataFrame(ts_dict["data"], columns=ts_dict["columns"].split(","))
+            # Add timeseries metadata
+            for key in ts_dict:
+                if key not in ("data", "columns", "rows"):
+                    df[key] = ts_dict[key]
+            # Add ensemble-level metadata
+            df["ensembledate"] = row["ensembledate"]
+            df["ensembledispatchinfo"] = row["ensembledispatchinfo"]
+            # Convert timestamp
+            if "Timestamp" in df.columns:
+                df["Timestamp"] = pd.to_datetime(
+                    df["Timestamp"], utc=True
+                ).dt.tz_convert(timezone)
+            all_series.append(df)
+
+        df_data = pd.concat(all_series, ignore_index=True)
+        df_data.rename({"0": "value"}, axis=1, inplace=True)
+
+        return df_data

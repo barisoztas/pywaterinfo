@@ -609,3 +609,15 @@ class TestEnsembleTimeSeries:
             assert str(excinfo.value) == (
                 "Both start and end arguments must be provided"
             )
+
+    @pytest.mark.parametrize("connection", ["hic_connection", "hic_cached_connection"])
+    def test_valid_period_or_start_end(self, connection, request):
+        """For valid cases, a dict with ensemble members should be returned"""
+        conn = request.getfixturevalue(connection)
+
+        data, response = conn.get_ensemble_timeseries_values(
+            start="2025-06-01T00:00:00Z",
+            end="2025-06-03T00:00:00Z",
+            ts_id=84021010,
+        )
+        assert isinstance(data, dict)
