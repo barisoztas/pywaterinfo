@@ -581,3 +581,17 @@ class TestTimeseriesList:
         connection = request.getfixturevalue(connection)
         df = connection.get_timeseries_list(station_no="plu03a-1066")
         assert "station_no" in df.columns
+
+
+class TestEnsembleTimeSeries:
+    @pytest.mark.parametrize("connection", ["vmm_connection", "vmm_cached_connection"])
+    def test_not_implemented(self, connection, request):
+        """Not yet implemented in KIWIS API"""
+        connection = request.getfixturevalue(connection)
+        with pytest.raises(NotImplementedError):
+            connection.get_ensemble_timeseries_values(
+                ts_id=78124042,
+                start="20190501",
+                end="20190502",
+                returnfields="Timestamp,Value,Tide Number",
+            )
