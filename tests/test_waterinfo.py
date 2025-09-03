@@ -589,9 +589,4 @@ class TestEnsembleTimeSeries:
         """Not yet implemented in KIWIS API"""
         connection = request.getfixturevalue(connection)
         with pytest.raises(NotImplementedError):
-            connection.get_ensemble_timeseries_values(
-                ts_id=78124042,
-                start="20190501",
-                end="20190502",
-                returnfields="Timestamp,Value,Tide Number",
-            )
+            connection.get_ensemble_timeseries_values()
