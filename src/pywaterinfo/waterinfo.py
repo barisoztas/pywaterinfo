@@ -883,6 +883,10 @@ class Waterinfo:
 
     def get_ensemble_timeseries_values(
         self,
+        period=None,
+        start=None,
+        end=None,
+        ts_id=84021010,
         **kwargs,
     ):
         """Get ensemble series data from waterinfo.be
@@ -892,5 +896,28 @@ class Waterinfo:
 
         if self._datasource == "1":
             raise WaterinfoException("Ensemble data not available for VMM.")
+
+        if "timezone" in kwargs.keys():
+            timezone = kwargs["timezone"]
         else:
-            raise NotImplementedError("Ensemble data not implemented yet.")
+            timezone = "UTC"
+
+        if period is not None:
+            raise WaterinfoException("Period argument not implemented yet.")
+
+        # check the period information
+        period_info = self._parse_period(
+            start=start, end=end, period=period, timezone=timezone
+        )
+
+        query_param = dict(
+            request="getTimeseriesEnsembleValues",
+            ts_id=ts_id,
+            # returnfields=",".join(all_returnfields),
+        )
+        query_param.update(period_info)
+        query_param.update(kwargs)
+
+        data, response = self.request_kiwis(query_param)
+
+        return data, response
