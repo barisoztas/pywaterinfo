@@ -149,7 +149,7 @@ class Waterinfo:
             expires_on = datetime.datetime.now() + datetime.timedelta(
                 seconds=expires_in
             )
-            logging.info(f"Current token expires on {expires_on}")
+            logger.info(f"Current token expires on {expires_on}")
 
         # request the API info from the waterinfo KIWIS service itself
         query_param = {"request": "getRequestInfo"}
@@ -255,14 +255,14 @@ class Waterinfo:
 
         if self._cache:
             if res.from_cache:
-                logging.info(f"Request {res.url} reused from cache.")
+                logger.info(f"Request {res.url} reused from cache.")
             else:
-                logging.info(
+                logger.info(
                     f"Successful waterinfo API request with call {res.url} "
                     f"(call to waterinfo.be with cache activated)."
                 )
         else:
-            logging.info(
+            logger.info(
                 f"Successful waterinfo API request with call {res.url} "
                 f"(call to waterinfo.be without cache activated)."
             )
