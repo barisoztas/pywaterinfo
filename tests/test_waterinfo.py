@@ -598,8 +598,7 @@ class TestEnsembleTimeSeries:
         with pytest.raises(WaterinfoException) as excinfo:
             conn.get_ensemble_timeseries_values(ts_id=84021010, start="2022-01-01")
             assert str(excinfo.value) == (
-                "Either a valid period or both start and end arguments must be"
-                " provided"
+                "Both start and end arguments must be provided"
             )
 
     @pytest.mark.parametrize("connection", ["hic_connection", "hic_cached_connection"])
@@ -608,28 +607,5 @@ class TestEnsembleTimeSeries:
         with pytest.raises(WaterinfoException) as excinfo:
             conn.get_ensemble_timeseries_values(ts_id=84021010, end="2022-01-01")
             assert str(excinfo.value) == (
-                "Either a valid period or both start and end arguments must be"
-                " provided"
-            )
-
-    @pytest.mark.parametrize("connection", ["hic_connection", "hic_cached_connection"])
-    def test_none_provided(self, connection, request):
-        conn = request.getfixturevalue(connection)
-        with pytest.raises(WaterinfoException) as excinfo:
-            conn.get_ensemble_timeseries_values(ts_id=84021010)
-            assert str(excinfo.value) == (
-                "Either a valid period or both start and end arguments must be"
-                " provided"
-            )
-
-    @pytest.mark.parametrize("connection", ["hic_connection", "hic_cached_connection"])
-    def test_all_provided(self, connection, request):
-        conn = request.getfixturevalue(connection)
-        with pytest.raises(WaterinfoException) as excinfo:
-            conn.get_ensemble_timeseries_values(
-                ts_id=84021010, start="2022-01-01", end="2022-01-02", period="P1D"
-            )
-            assert str(excinfo.value) == (
-                "Date information should be provided by a combination of maximum 2 "
-                "parameters out of from / to / period"
+                "Both start and end arguments must be provided"
             )

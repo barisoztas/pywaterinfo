@@ -905,10 +905,8 @@ class Waterinfo:
         # if period is not None:
         #     raise WaterinfoException("Period argument not implemented yet.")
 
-        if not period and not (start and end):
-            raise WaterinfoException(
-                "Either a valid period or both start and end arguments must be provided"
-            )
+        if start or end:
+            raise WaterinfoException("Both start and end arguments must be provided")
 
         # check the period information
         period_info = self._parse_period(
