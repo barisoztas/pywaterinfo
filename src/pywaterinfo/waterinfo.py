@@ -890,4 +890,7 @@ class Waterinfo:
         Not implemented yet.
         """
 
-        raise NotImplementedError("Function not yet implemented in the API wrapper.")
+        if self._datasource == "1":
+            raise WaterinfoException("Ensemble data not available for VMM.")
+        else:
+            raise NotImplementedError("Ensemble data not implemented yet.")
