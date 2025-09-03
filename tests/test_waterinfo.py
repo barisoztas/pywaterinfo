@@ -588,38 +588,39 @@ class TestEnsembleTimeSeries:
     def test_not_available_for_vmm(self, connection, request):
         """If provider is VMM, WaterinfoException should be raised"""
         connection = request.getfixturevalue(connection)
-        with pytest.raises(WaterinfoException):
+        with pytest.raises(WaterinfoException) as excinfo:
             connection.get_ensemble_timeseries_values()
+            assert str(excinfo.value) == "Ensemble data not available apart from HIC."
 
     @pytest.mark.parametrize("connection", ["hic_connection", "hic_cached_connection"])
     def test_only_start(self, connection, request):
         conn = request.getfixturevalue(connection)
         with pytest.raises(WaterinfoException) as excinfo:
             conn.get_ensemble_timeseries_values(ts_id=84021010, start="2022-01-01")
-        assert (
-            str(excinfo.value)
-            == "Either a valid period or both start and end arguments must be provided"
-        )
+            assert str(excinfo.value) == (
+                "Either a valid period or both start and end arguments must be"
+                " provided"
+            )
 
     @pytest.mark.parametrize("connection", ["hic_connection", "hic_cached_connection"])
     def test_only_end(self, connection, request):
         conn = request.getfixturevalue(connection)
         with pytest.raises(WaterinfoException) as excinfo:
             conn.get_ensemble_timeseries_values(ts_id=84021010, end="2022-01-01")
-        assert (
-            str(excinfo.value)
-            == "Either a valid period or both start and end arguments must be provided"
-        )
+            assert str(excinfo.value) == (
+                "Either a valid period or both start and end arguments must be"
+                " provided"
+            )
 
     @pytest.mark.parametrize("connection", ["hic_connection", "hic_cached_connection"])
     def test_none_provided(self, connection, request):
         conn = request.getfixturevalue(connection)
         with pytest.raises(WaterinfoException) as excinfo:
             conn.get_ensemble_timeseries_values(ts_id=84021010)
-        assert (
-            str(excinfo.value)
-            == "Either a valid period or both start and end arguments must be provided"
-        )
+            assert str(excinfo.value) == (
+                "Either a valid period or both start and end arguments must be"
+                " provided"
+            )
 
     @pytest.mark.parametrize("connection", ["hic_connection", "hic_cached_connection"])
     def test_all_provided(self, connection, request):
@@ -628,7 +629,7 @@ class TestEnsembleTimeSeries:
             conn.get_ensemble_timeseries_values(
                 ts_id=84021010, start="2022-01-01", end="2022-01-02", period="P1D"
             )
-        assert str(excinfo.value) == (
-            "Date information should be provided by a combination of maximum 2 "
-            "parameters out of from / to / period"
-        )
+            assert str(excinfo.value) == (
+                "Date information should be provided by a combination of maximum 2 "
+                "parameters out of from / to / period"
+            )

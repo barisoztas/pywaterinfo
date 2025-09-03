@@ -894,8 +894,8 @@ class Waterinfo:
         Not implemented yet.
         """
 
-        if self._datasource == "1":
-            raise WaterinfoException("Ensemble data not available for VMM.")
+        if self._datasource != "4":
+            raise WaterinfoException("Ensemble data not available apart from HIC.")
 
         if "timezone" in kwargs.keys():
             timezone = kwargs["timezone"]
