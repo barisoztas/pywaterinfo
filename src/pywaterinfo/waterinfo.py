@@ -880,3 +880,14 @@ class Waterinfo:
             return pd.DataFrame([])
         else:
             return pd.DataFrame(data[1:], columns=data[0])
+
+    def get_ensemble_timeseries_values(
+        self,
+        **kwargs,
+    ):
+        """Get ensemble series data from waterinfo.be
+
+        Not implemented yet.
+        """
+
+        raise NotImplementedError("Function not yet implemented in the API wrapper.")
