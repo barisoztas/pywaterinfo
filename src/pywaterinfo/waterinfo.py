@@ -883,15 +883,57 @@ class Waterinfo:
 
     def get_ensemble_timeseries_values(
         self,
+        ts_id=None,
+        ts_path=None,
         period=None,
         start=None,
         end=None,
-        ts_id=84021010,
         **kwargs,
     ):
         """Get ensemble series data from waterinfo.be
 
-        Not implemented yet.
+        Parameters
+        ----------
+        ts_id : str
+            single or multiple ts_id values, comma-separated, eg 44223010
+        period : str
+            input string according to format required by waterinfo: the period string
+            is provided as P#Y#M#DT#H#M#S, with P defines `Period`, each # is an
+            integer value and the codes define the number of...
+            Y - years M - months D - days T required if information about sub-day
+            resolution is present H - hours D - days M - minutes S - seconds Instead
+            of D (days), the usage of W - weeks is possible as well.
+            Examples of valid period strings: P3D, P1Y, P1DT12H, PT6H, P1Y6M3DT4H20M30S.
+        start : datetime | str
+            Either Python datetime object or a string which can be interpreted
+            as a valid Timestamp.
+        end : datetime | str
+            Either Python datetime object or a string which can be interpreted
+            as a valid Timestamp.
+        kwargs :
+            Additional query parameter options as documented by KIWIS waterinfo API,
+            see `API documentation <https://download.waterinfo.be/tsmdownload/KiWIS
+                    /KiWIS?service=kisters&type=QueryServices
+                    &format=html&request=getrequestinfo>`_
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame with for time series data and datetime in UTC.
+
+
+        Examples
+        --------
+        >>> from pywaterinfo import Waterinfo
+        >>> hic = Waterinfo("hic")
+        >>>
+        >>> # get last day of data for the time series with ID 84021010
+        >>> df = hic.get_ensemble_timeseries_values(ts_id="84021010", period="P1D")
+        >>>
+        >>> # get last day of data for the time series with ts path
+        >>> df = hic.get_ensemble_timeseries_values(
+        ...     ts_path="Aarschot/dem02a-1066/Q_voorspeld/Cmd.Ensemble.Binary.KT-det.O",
+        ...     period="P1D")
+
         """
 
         if self._datasource != "4":
@@ -902,26 +944,41 @@ class Waterinfo:
         else:
             timezone = "UTC"
 
-        #
         if not (period or (start and end)):
             raise WaterinfoException(
                 "Either a valid period or both start and end arguments must be provided"
             )
+
+        # either ts_id or ts_path
+        if ts_id and ts_path:
+            raise WaterinfoException(
+                "A combination of ts_id and ts_path is not possible, use one"
+            )
+        if not ts_id and not ts_path:
+            raise WaterinfoException("Either ts_id or ts_path is required.")
+
         # check the period information
         period_info = self._parse_period(
             start=start, end=end, period=period, timezone=timezone
         )
 
-        query_param = dict(
-            request="getTimeseriesEnsembleValues",
-            ts_id=ts_id,
-            # returnfields=",".join(all_returnfields),
-        )
+        if ts_id is None:
+            query_param = dict(
+                request="getTimeseriesEnsembleValues",
+                ts_path=ts_path,
+            )
+        elif ts_path is None:
+            query_param = dict(
+                request="getTimeseriesEnsembleValues",
+                ts_id=ts_id,
+            )
+
         query_param.update(period_info)
         query_param.update(kwargs)
 
         data, response = self.request_kiwis(query_param)
 
+        ts_id = list(pd.DataFrame(data).keys())[0]
         df_ensembles = pd.DataFrame(data[str(ts_id)])
 
         all_series = []
@@ -943,6 +1000,6 @@ class Waterinfo:
             all_series.append(df)
 
         df_data = pd.concat(all_series, ignore_index=True)
-        df_data.rename({"0": "value"}, axis=1, inplace=True)
+        df_data.rename({"0": "Value"}, axis=1, inplace=True)
 
         return df_data
