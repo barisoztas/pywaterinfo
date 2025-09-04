@@ -890,8 +890,7 @@ class Waterinfo:
         end=None,
         **kwargs,
     ):
-        """Get ensemble series data from waterinfo.be
-
+        """Get ensemble time series data from HIC service.
 
         Parameters
         ----------
@@ -916,7 +915,7 @@ class Waterinfo:
 
         Returns
         -------
-        pd.DataFrame
+        pandas.DataFrame
             DataFrame with for time series data and datetime in UTC.
 
 

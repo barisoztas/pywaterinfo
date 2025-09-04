@@ -98,6 +98,14 @@ time series as illustrated in the following example:
     If you want 'naive' timestamps in the returned time series, use the :code:`tz_localize`
     function of Pandas, e.g. :code:`df["Timestamp"] = df["Timestamp"].dt.tz_localize(None)`.
 
+Ensemble time series
+-------------------
+
+For detailed information regarding the ensemble data, please consult respective part of
+the HIC
+
+
+
 Time series groups
 ------------------
 
