@@ -895,9 +895,9 @@ class Waterinfo:
 
         Parameters
         ----------
-        ts_id : str
+        ts_id : str or int
             single ts_id values
-        ts_path : str
+        ts_path : str or int
             single ts_path values
         period : str
             input string according to format required by waterinfo: the period string
@@ -934,16 +934,17 @@ class Waterinfo:
         ...     period="P1D")
 
         """
-        # if ts_id is comma seperated str, raise not implemented error
-        if ts_id and ("," in ts_id):
-            raise NotImplementedError(
-                "Multiple ts_id values not yet implemented, use one ts_id at a time"
-            )
-        if ts_path and ("," in ts_path):
-            raise NotImplementedError(
-                "Multiple ts_path values not yet implemented, use one ts_path at a time"
-            )
+        if isinstance(ts_id, int):
+            ts_id = str(ts_id)
+        if isinstance(ts_path, int):
+            ts_path = str(ts_path)
 
+        # if ts_id is comma seperated str, raise not implemented error
+        if ts_id and ("," in ts_id) or ts_path and ("," in ts_path):
+            raise NotImplementedError(
+                "Multiple identifier values not yet implemented, use one "
+                "identifier at a time"
+            )
         if self._datasource != "4":
             raise WaterinfoException("Ensemble data not available apart from HIC.")
 
