@@ -892,10 +892,13 @@ class Waterinfo:
     ):
         """Get ensemble series data from waterinfo.be
 
+
         Parameters
         ----------
         ts_id : str
-            single or multiple ts_id values, comma-separated, eg 44223010
+            single ts_id values
+        ts_path : str
+            single ts_path values
         period : str
             input string according to format required by waterinfo: the period string
             is provided as P#Y#M#DT#H#M#S, with P defines `Period`, each # is an
@@ -910,11 +913,7 @@ class Waterinfo:
         end : datetime | str
             Either Python datetime object or a string which can be interpreted
             as a valid Timestamp.
-        kwargs :
-            Additional query parameter options as documented by KIWIS waterinfo API,
-            see `API documentation <https://download.waterinfo.be/tsmdownload/KiWIS
-                    /KiWIS?service=kisters&type=QueryServices
-                    &format=html&request=getrequestinfo>`_
+
         Returns
         -------
         pd.DataFrame
@@ -935,6 +934,15 @@ class Waterinfo:
         ...     period="P1D")
 
         """
+        # if ts_id is comma seperated str, raise not implemented error
+        if ts_id and ("," in ts_id):
+            raise NotImplementedError(
+                "Multiple ts_id values not yet implemented, use one ts_id at a time"
+            )
+        if ts_path and ("," in ts_path):
+            raise NotImplementedError(
+                "Multiple ts_path values not yet implemented, use one ts_path at a time"
+            )
 
         if self._datasource != "4":
             raise WaterinfoException("Ensemble data not available apart from HIC.")
