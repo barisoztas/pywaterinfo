@@ -585,8 +585,8 @@ class TestTimeseriesList:
 
 class TestEnsembleTimeSeries:
     @pytest.mark.parametrize("connection", ["vmm_connection", "vmm_cached_connection"])
-    def test_not_available_for_vmm(self, connection, request):
-        """If provider is VMM, WaterinfoException should be raised"""
+    def test_not_available_apart_from_hic(self, connection, request):
+        """If provider is not HIC, WaterinfoException should be raised"""
         connection = request.getfixturevalue(connection)
         with pytest.raises(WaterinfoException) as excinfo:
             connection.get_ensemble_timeseries_values()
@@ -594,9 +594,10 @@ class TestEnsembleTimeSeries:
 
     @pytest.mark.parametrize("connection", ["hic_connection", "hic_cached_connection"])
     def test_only_start(self, connection, request):
+        """If only start is provided, WaterinfoException should be raised"""
         conn = request.getfixturevalue(connection)
         with pytest.raises(WaterinfoException) as excinfo:
-            conn.get_ensemble_timeseries_values(ts_id=84021010, start="2022-01-01")
+            conn.get_ensemble_timeseries_values(ts_id="84021010", start="2022-01-01")
             assert str(excinfo.value) == (
                 "Both start and end arguments must be provided"
             )
@@ -605,19 +606,96 @@ class TestEnsembleTimeSeries:
     def test_only_end(self, connection, request):
         conn = request.getfixturevalue(connection)
         with pytest.raises(WaterinfoException) as excinfo:
-            conn.get_ensemble_timeseries_values(ts_id=84021010, end="2022-01-01")
-            assert str(excinfo.value) == (
-                "Both start and end arguments must be provided"
-            )
+            conn.get_ensemble_timeseries_values(ts_id="84021010", end="2022-01-01")
+            assert str(excinfo.value) == ("ts_id or ts_path should be a string")
 
     @pytest.mark.parametrize("connection", ["hic_connection", "hic_cached_connection"])
-    def test_valid_period_or_start_end(self, connection, request):
-        """For valid cases, a dict with ensemble members should be returned"""
+    @pytest.mark.parametrize(
+        "kwargs",
+        [
+            {"ts_id": "tsid_1,ts_id2"},
+            {"ts_path": "data/path,data_path_2"},
+        ],
+    )
+    def test_no_multiple_ids_or_paths(self, connection, kwargs, request):
+        """Do not allow multiple identifiers until implemented"""
+        conn = request.getfixturevalue(connection)
+        with pytest.raises(NotImplementedError) as excinfo:
+            conn.get_ensemble_timeseries_values(**kwargs)
+        assert str(excinfo.value) == (
+            "Multiple identifier values not yet implemented, use one "
+            "identifier at a time"
+        )
+
+    @pytest.mark.parametrize("connection", ["hic_connection", "hic_cached_connection"])
+    def test_cannot_have_two_identifiers(self, connection, request):
+        """Do not allow multiple identifiers until implemented"""
+        conn = request.getfixturevalue(connection)
+        with pytest.raises(WaterinfoException) as excinfo:
+            conn.get_ensemble_timeseries_values(
+                ts_id="tsid1",
+                ts_path="data/path",
+                start="2025-06-01T00:00:00Z",
+                end="2025-06-01T12:00:00Z",
+            )
+        assert str(excinfo.value) == (
+            "A combination of ts_id and ts_path is not possible, use one"
+        )
+
+    @pytest.mark.parametrize("connection", ["hic_connection", "hic_cached_connection"])
+    def test_no_identifier(self, connection, request):
+        """If no identifier is provided, WaterinfoException should be raised"""
+        conn = request.getfixturevalue(connection)
+        with pytest.raises(WaterinfoException) as excinfo:
+            conn.get_ensemble_timeseries_values(
+                start="2025-06-01T00:00:00Z",
+                end="2025-06-01T12:00:00Z",
+            )
+            assert str(excinfo.value) == ("Either ts_id or ts_path is required.")
+
+    @pytest.mark.parametrize("connection", ["hic_connection", "hic_cached_connection"])
+    def test_valid_request_ts_id(self, connection, request):
+        """For valid cases, a pd.dataframe with ensemble members should be returned"""
         conn = request.getfixturevalue(connection)
 
         data = conn.get_ensemble_timeseries_values(
             start="2025-06-01T00:00:00Z",
             end="2025-06-01T12:00:00Z",
-            ts_id=84021010,
+            ts_id="84021010",
         )
         assert isinstance(data, pd.DataFrame)
+
+    @pytest.mark.parametrize("connection", ["hic_connection", "hic_cached_connection"])
+    def test_valid_request_ts_path(self, connection, request):
+        """For valid cases, a pd.dataframe with ensemble members should be returned"""
+        conn = request.getfixturevalue(connection)
+
+        data = conn.get_ensemble_timeseries_values(
+            start="2025-06-01T00:00:00Z",
+            end="2025-06-01T12:00:00Z",
+            ts_path="Aarschot/dem02a-1066/Q_voorspeld/Cmd.Ensemble.Binary.KT-det.O",
+        )
+        assert isinstance(data, pd.DataFrame)
+
+    @pytest.mark.parametrize(
+        ("tz,expected_dt_object"),
+        [
+            ("Europe/Brussels", pytz.timezone("Europe/Brussels")),
+            ("UTC", datetime.timezone.utc),
+        ],
+    )
+    @pytest.mark.parametrize("connection", ["hic_connection", "hic_cached_connection"])
+    def test_timezone_provided(self, tz, expected_dt_object, connection, request):
+        """If timezone is provided, WaterinfoException should be raised"""
+        conn = request.getfixturevalue(connection)
+        data = conn.get_ensemble_timeseries_values(
+            start="2025-06-01T00:00:00",
+            end="2025-06-01T12:00:00",
+            ts_id="84021010",
+            timezone=tz,
+        )
+
+        assert isinstance(data, pd.DataFrame)
+        # check if the timezone of the returned timestamps is CET
+        # asserting if it is an instance of datetime.timezone.tz
+        assert type(data["Timestamp"].dt.tz) is type(expected_dt_object)
