@@ -601,7 +601,7 @@ class TestEnsembleTimeSeries:
         ],
     )
     def test_no_commaseperated_ids_or_paths(self, connection, kwargs, request):
-        """Do not allow multiple identifiers until implemented"""
+        """Do not allow commaseperated identifiers until implemented"""
         conn = request.getfixturevalue(connection)
         with pytest.raises(NotImplementedError) as excinfo:
             conn.get_ensemble_timeseries_values(**kwargs)
@@ -637,7 +637,7 @@ class TestEnsembleTimeSeries:
         """Handles the cases where timeseries is different than Det.Abs.O
 
         Should also provide current ts_id ts_path match, so user can retry with correct
-        ts_path
+        ts_path.
         """
         conn = request.getfixturevalue(connection)
 
@@ -653,7 +653,7 @@ class TestEnsembleTimeSeries:
 
     @pytest.mark.parametrize("connection", ["hic_connection", "hic_cached_connection"])
     def test_cannot_have_two_identifiers(self, connection, request):
-        """Do not allow multiple identifiers until implemented"""
+        """Do not allow multiple identifiers"""
         conn = request.getfixturevalue(connection)
         with pytest.raises(WaterinfoException) as excinfo:
             conn.get_ensemble_timeseries_values(
@@ -679,7 +679,7 @@ class TestEnsembleTimeSeries:
 
     @pytest.mark.parametrize("connection", ["hic_connection", "hic_cached_connection"])
     def test_no_date_or_period(self, connection, request):
-        """If no identifier is provided, WaterinfoException should be raised"""
+        """If no date or period is provided, NotImplementedError should be raised"""
         conn = request.getfixturevalue(connection)
         with pytest.raises(NotImplementedError) as excinfo:
             conn.get_ensemble_timeseries_values(
@@ -745,7 +745,7 @@ class TestEnsembleTimeSeries:
 
     @pytest.mark.parametrize("connection", ["hic_connection", "hic_cached_connection"])
     def test_timezone_not_provided(self, connection, request):
-        """If timezone is overwritten, data should have timezone information"""
+        """If timezone is not provided, data should timezone of UTC."""
         conn = request.getfixturevalue(connection)
         data = conn.get_ensemble_timeseries_values(
             start="2025-06-01T00:00:00",
