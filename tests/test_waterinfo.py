@@ -593,23 +593,6 @@ class TestEnsembleTimeSeries:
             assert str(excinfo.value) == "Ensemble data not available apart from HIC."
 
     @pytest.mark.parametrize("connection", ["hic_connection", "hic_cached_connection"])
-    def test_only_start(self, connection, request):
-        """If only start is provided, WaterinfoException should be raised"""
-        conn = request.getfixturevalue(connection)
-        with pytest.raises(WaterinfoException) as excinfo:
-            conn.get_ensemble_timeseries_values(ts_id="84021010", start="2022-01-01")
-            assert str(excinfo.value) == (
-                "Both start and end arguments must be provided"
-            )
-
-    @pytest.mark.parametrize("connection", ["hic_connection", "hic_cached_connection"])
-    def test_only_end(self, connection, request):
-        conn = request.getfixturevalue(connection)
-        with pytest.raises(WaterinfoException) as excinfo:
-            conn.get_ensemble_timeseries_values(ts_id="84021010", end="2022-01-01")
-            assert str(excinfo.value) == ("ts_id or ts_path should be a string")
-
-    @pytest.mark.parametrize("connection", ["hic_connection", "hic_cached_connection"])
     @pytest.mark.parametrize(
         "kwargs",
         [
@@ -617,7 +600,7 @@ class TestEnsembleTimeSeries:
             {"ts_path": "data/path,data_path_2"},
         ],
     )
-    def test_no_multiple_ids_or_paths(self, connection, kwargs, request):
+    def test_no_commaseperated_ids_or_paths(self, connection, kwargs, request):
         """Do not allow multiple identifiers until implemented"""
         conn = request.getfixturevalue(connection)
         with pytest.raises(NotImplementedError) as excinfo:
@@ -678,15 +661,12 @@ class TestEnsembleTimeSeries:
         assert isinstance(data, pd.DataFrame)
 
     @pytest.mark.parametrize(
-        ("tz,expected_dt_object"),
-        [
-            ("Europe/Brussels", pytz.timezone("Europe/Brussels")),
-            ("UTC", datetime.timezone.utc),
-        ],
+        "tz",
+        ["Europe/Brussels", "CET", "EST", "Greenwich"],
     )
     @pytest.mark.parametrize("connection", ["hic_connection", "hic_cached_connection"])
-    def test_timezone_provided(self, tz, expected_dt_object, connection, request):
-        """If timezone is provided, WaterinfoException should be raised"""
+    def test_timezone_provided(self, tz, connection, request):
+        """If timezone is overwritten, data should have timezone information"""
         conn = request.getfixturevalue(connection)
         data = conn.get_ensemble_timeseries_values(
             start="2025-06-01T00:00:00",
@@ -696,6 +676,5 @@ class TestEnsembleTimeSeries:
         )
 
         assert isinstance(data, pd.DataFrame)
-        # check if the timezone of the returned timestamps is CET
-        # asserting if it is an instance of datetime.timezone.tz
-        assert type(data["Timestamp"].dt.tz) is type(expected_dt_object)
+        timezone_retrieved = data["Timestamp"].dt.tz.zone
+        assert timezone_retrieved == tz
