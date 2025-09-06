@@ -45,7 +45,7 @@ ax.plot(
     df_inconsistent_ensemble_data["Timestamp"],
     df_inconsistent_ensemble_data["0"],
     label=(
-        "Nonconsistent result returned for a given period"
+        "Nonconsistent result returned for a given period\n"
         "when retrieved with `get_timeseries_values`"
     ),
     color="k",
