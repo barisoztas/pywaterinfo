@@ -207,9 +207,8 @@ values from mixed TOFs, as can be seen from the returned brown timeseries shown 
 
 .. plot:: plots/plot_inconsistent_results.py
 
-    Figure showing (in brown) the non-consistent result for 28/01/2021 that will be
+    Figure showing (in black) the non-consistent result for 28/01/2021 that will be
     returned by HIC Webservices when treated as a Cmd time series
-
 
 
 Time series groups

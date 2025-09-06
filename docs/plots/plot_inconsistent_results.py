@@ -1,6 +1,17 @@
+import matplotlib
 import matplotlib.pyplot as plt
 
 from pywaterinfo import Waterinfo
+
+matplotlib.rcParams.update(
+    {
+        "font.family": "monospace",  # or 'serif', 'monospace', etc.
+        "font.size": 12,  # set the default font size
+        "figure.figsize": (15, 8),
+        "figure.dpi": 300,
+    }
+)
+
 
 hic = Waterinfo("hic")
 
@@ -12,7 +23,7 @@ df_ensemble_data = hic.get_ensemble_timeseries_values(
 )
 
 
-fig, ax = plt.subplots(figsize=(10, 4), dpi=300)
+fig, ax = plt.subplots()
 
 for name, group in df_ensemble_data.groupby("ensembledate"):
     _ = ax.plot(
@@ -46,5 +57,5 @@ _ = ax.set_ylabel("Value")
 _ = ax.set_title("Non-consistent result (black) for 28/01/2021")
 _ = ax.grid(True)
 
-
+plt.tight_layout()
 plt.show()
