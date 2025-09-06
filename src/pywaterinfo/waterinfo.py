@@ -958,6 +958,13 @@ class Waterinfo:
         if not ts_id and not ts_path:
             raise WaterinfoException("Either ts_id or ts_path is required.")
 
+        # if none of 3 provided, error
+        if (not start) and (not end) and (not period):
+            raise NotImplementedError(
+                "Currently, pywaterinfo doesn't support calling "
+                "`get_ensemble_timeseries_values` without any time information."
+            )
+
         # check the period information
         period_info = self._parse_period(
             start=start, end=end, period=period, timezone=timezone

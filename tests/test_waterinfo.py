@@ -640,13 +640,13 @@ class TestEnsembleTimeSeries:
     def test_no_date_or_period(self, connection, request):
         """If no identifier is provided, WaterinfoException should be raised"""
         conn = request.getfixturevalue(connection)
-        with pytest.raises(WaterinfoException) as excinfo:
+        with pytest.raises(NotImplementedError) as excinfo:
             conn.get_ensemble_timeseries_values(
                 ts_id="84021010",
             )
             assert str(excinfo.value) == (
-                "Date information should be provided by a combination of 2 "
-                "parameters out of from / to / period"
+                "Currently, pywaterinfo doesn't support calling "
+                "`get_ensemble_timeseries_values` without any time information."
             )
 
     @pytest.mark.parametrize("connection", ["hic_connection", "hic_cached_connection"])
