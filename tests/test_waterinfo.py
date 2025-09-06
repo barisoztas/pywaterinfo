@@ -611,6 +611,39 @@ class TestEnsembleTimeSeries:
         )
 
     @pytest.mark.parametrize("connection", ["hic_connection", "hic_cached_connection"])
+    def test_invalid_ensemble_ts_path_not_implemented(self, connection, request):
+        """For valid cases, a pd.dataframe with ensemble members should be returned"""
+        conn = request.getfixturevalue(connection)
+
+        with pytest.raises(NotImplementedError) as excinfo:
+            conn.get_ensemble_timeseries_values(
+                start="2025-06-01T00:00:00Z",
+                end="2025-06-01T12:00:00Z",
+                ts_path=(
+                    "Aarschot/dem02a-1066/H_voorspeld/Cmd.Ensemble.Binary.KT-Perc.Abs.O"
+                ),
+            )
+
+        assert str(excinfo.value) == (
+            "Currently, timeseries only ends with Det.Abs.O are allowed."
+            "Consider changing `Perc.Abs.O` to `Det.Abs.O`"
+        )
+
+    @pytest.mark.parametrize("connection", ["hic_connection", "hic_cached_connection"])
+    def test_invalid_ensemble_ts_id_not_implemented(self, connection, request):
+        """For valid cases, a pd.dataframe with ensemble members should be returned"""
+        conn = request.getfixturevalue(connection)
+
+        with pytest.raises(NotImplementedError) as excinfo:
+            conn.get_ensemble_timeseries_values(
+                start="2025-06-01T00:00:00Z",
+                end="2025-06-01T12:00:00Z",
+                ts_id=84019010,
+            )
+
+        assert "Consider changing `Perc.Abs.O` to `Det.Abs.O`." in str(excinfo.value)
+
+    @pytest.mark.parametrize("connection", ["hic_connection", "hic_cached_connection"])
     def test_cannot_have_two_identifiers(self, connection, request):
         """Do not allow multiple identifiers until implemented"""
         conn = request.getfixturevalue(connection)
