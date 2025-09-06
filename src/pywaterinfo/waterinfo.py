@@ -1007,7 +1007,4 @@ class Waterinfo:
                 ).dt.tz_convert(timezone)
             all_series.append(df)
 
-        df_data = pd.concat(all_series, ignore_index=True)
-        df_data.rename({"0": "Value"}, axis=1, inplace=True)
-
-        return df_data
+        return pd.concat(all_series)
