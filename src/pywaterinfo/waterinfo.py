@@ -935,8 +935,6 @@ class Waterinfo:
         """
         if isinstance(ts_id, int):
             ts_id = str(ts_id)
-        if isinstance(ts_path, int):
-            ts_path = str(ts_path)
 
         # if ts_id is comma seperated str, raise not implemented error
         if ts_id and ("," in ts_id) or ts_path and ("," in ts_path):
@@ -951,11 +949,6 @@ class Waterinfo:
             timezone = kwargs["timezone"]
         else:
             timezone = "UTC"
-
-        if not (period or (start and end)):
-            raise WaterinfoException(
-                "Either a valid period or both start and end arguments must be provided"
-            )
 
         # either ts_id or ts_path
         if ts_id and ts_path:

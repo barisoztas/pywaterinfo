@@ -637,14 +637,37 @@ class TestEnsembleTimeSeries:
             assert str(excinfo.value) == ("Either ts_id or ts_path is required.")
 
     @pytest.mark.parametrize("connection", ["hic_connection", "hic_cached_connection"])
-    def test_valid_request_ts_id(self, connection, request):
+    def test_no_date_or_period(self, connection, request):
+        """If no identifier is provided, WaterinfoException should be raised"""
+        conn = request.getfixturevalue(connection)
+        with pytest.raises(WaterinfoException) as excinfo:
+            conn.get_ensemble_timeseries_values(
+                ts_id="84021010",
+            )
+            assert str(excinfo.value) == (
+                "Date information should be provided by a combination of 2 "
+                "parameters out of from / to / period"
+            )
+
+    @pytest.mark.parametrize("connection", ["hic_connection", "hic_cached_connection"])
+    def test_valid_request_ts_id_str(self, connection, request):
+        """For valid cases, a pd.dataframe with ensemble members should be returned"""
+        conn = request.getfixturevalue(connection)
+
+        data = conn.get_ensemble_timeseries_values(
+            start="2025-06-01T00:00:00Z", end="2025-06-01T12:00:00Z", ts_id="84021010"
+        )
+        assert isinstance(data, pd.DataFrame)
+
+    @pytest.mark.parametrize("connection", ["hic_connection", "hic_cached_connection"])
+    def test_valid_request_ts_id_int(self, connection, request):
         """For valid cases, a pd.dataframe with ensemble members should be returned"""
         conn = request.getfixturevalue(connection)
 
         data = conn.get_ensemble_timeseries_values(
             start="2025-06-01T00:00:00Z",
             end="2025-06-01T12:00:00Z",
-            ts_id="84021010",
+            ts_id=84021010,
         )
         assert isinstance(data, pd.DataFrame)
 
@@ -678,3 +701,16 @@ class TestEnsembleTimeSeries:
         assert isinstance(data, pd.DataFrame)
         timezone_retrieved = data["Timestamp"].dt.tz.zone
         assert timezone_retrieved == tz
+
+    @pytest.mark.parametrize("connection", ["hic_connection", "hic_cached_connection"])
+    def test_timezone_not_provided(self, connection, request):
+        """If timezone is overwritten, data should have timezone information"""
+        conn = request.getfixturevalue(connection)
+        data = conn.get_ensemble_timeseries_values(
+            start="2025-06-01T00:00:00",
+            end="2025-06-01T12:00:00",
+            ts_id="84021010",
+        )
+
+        assert isinstance(data, pd.DataFrame)
+        assert type(data["Timestamp"].dt.tz) is type(datetime.timezone.utc)
