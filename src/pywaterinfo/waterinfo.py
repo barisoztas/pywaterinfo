@@ -1002,7 +1002,7 @@ class Waterinfo:
         # data slightly different format
         if "Perc.Abs.O" in ts_path:
             raise NotImplementedError(
-                f"Current ts_path is {ts_path}.\n"
+                f"Current ts_id={ts_id} has a ts_path of {ts_path}.\n"
                 "Currently, timeseries only ends with Det.Abs.O are allowed."
                 "Consider changing `Perc.Abs.O` to `Det.Abs.O`."
             )

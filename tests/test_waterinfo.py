@@ -612,7 +612,7 @@ class TestEnsembleTimeSeries:
 
     @pytest.mark.parametrize("connection", ["hic_connection", "hic_cached_connection"])
     def test_invalid_ensemble_ts_path_not_implemented(self, connection, request):
-        """For valid cases, a pd.dataframe with ensemble members should be returned"""
+        """Handles the cases where timeseries is different than Det.Abs.O"""
         conn = request.getfixturevalue(connection)
 
         with pytest.raises(NotImplementedError) as excinfo:
@@ -630,18 +630,26 @@ class TestEnsembleTimeSeries:
         )
 
     @pytest.mark.parametrize("connection", ["hic_connection", "hic_cached_connection"])
-    def test_invalid_ensemble_ts_id_not_implemented(self, connection, request):
-        """For valid cases, a pd.dataframe with ensemble members should be returned"""
+    @pytest.mark.parametrize("perc_ts_id", [84019010])
+    def test_invalid_ensemble_ts_id_not_implemented(
+        self, perc_ts_id, connection, request
+    ):
+        """Handles the cases where timeseries is different than Det.Abs.O
+
+        Should also provide current ts_id ts_path match, so user can retry with correct
+        ts_path
+        """
         conn = request.getfixturevalue(connection)
 
         with pytest.raises(NotImplementedError) as excinfo:
             conn.get_ensemble_timeseries_values(
                 start="2025-06-01T00:00:00Z",
                 end="2025-06-01T12:00:00Z",
-                ts_id=84019010,
+                ts_id=perc_ts_id,
             )
 
         assert "Consider changing `Perc.Abs.O` to `Det.Abs.O`." in str(excinfo.value)
+        assert f"Current ts_id={perc_ts_id} has a ts_path of" in str(excinfo.value)
 
     @pytest.mark.parametrize("connection", ["hic_connection", "hic_cached_connection"])
     def test_cannot_have_two_identifiers(self, connection, request):
